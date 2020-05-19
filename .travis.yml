@@ -31,5 +31,5 @@ deploy:
   user: reverb
   on:
     tags: true
-    condition: "$TOXENV = py37"
+    condition: "$TOX_ENV = py38"
   distributions: bdist_wheel
