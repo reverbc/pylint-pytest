@@ -1,0 +1,3 @@
+def not_a_test_function(conftest_fixture_func):
+    # invalid test case...
+    assert True

@@ -1,0 +1,6 @@
+*.pyc
+__pycache__/
+.tox/
+build/
+sandbox/**/*.py
+Pipfile*

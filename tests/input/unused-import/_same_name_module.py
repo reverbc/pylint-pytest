@@ -1,0 +1,3 @@
+def conftest_fixture_attr():
+    # not really a fixture...
+    return True
