@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from os import path
 from setuptools import setup
+
+
+here = path.abspath(path.dirname(__file__))
+with open(path.join(here, 'README.md')) as fin:
+    long_description = fin.read()
 
 
 setup(
@@ -13,7 +19,9 @@ setup(
     maintainer_email='pylint-pytest@reverbc.tw',
     license='MIT',
     url='https://github.com/reverbc/pylint-pytest',
-    description='A Pylint plugin to suppress pytest fixture related false positive warnings.',
+    description='A Pylint plugin to suppress pytest-related false positives.',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     py_modules=['pylint_pytest'],
     install_requires=[
         'pylint',
