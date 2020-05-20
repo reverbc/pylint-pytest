@@ -1,0 +1,3 @@
+def not_a_test_function(*args, **kwargs):
+    # invalid test case...
+    assert True

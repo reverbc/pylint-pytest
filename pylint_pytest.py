@@ -191,14 +191,14 @@ def register(_):
 
         # check W0613 unused-argument
         if msgid == 'unused-argument' and \
-                node.name in self._pytest_fixtures and \
-                _can_use_fixture(node.parent.parent):
+                _can_use_fixture(node.parent.parent) and \
+                node.name in self._pytest_fixtures:
             return
 
         # check W0621 redefined-outer-name
         if msgid == 'redefined-outer-name' and \
-                node.name in self._pytest_fixtures and \
-                _can_use_fixture(node.parent.parent):
+                _can_use_fixture(node.parent.parent) and \
+                node.name in self._pytest_fixtures:
             return
 
         if int(pylint.__version__.split('.')[0]) >= 2:

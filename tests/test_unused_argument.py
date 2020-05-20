@@ -18,3 +18,10 @@ class TestUnusedArgument(BasePytestFixtureChecker):
             enable_plugin=enable_plugin,
             msg_count=1,
         )
+
+    @pytest.mark.parametrize('enable_plugin', [True, False])
+    def test_args_and_kwargs(self, enable_plugin):
+        self.run_test(
+            enable_plugin=enable_plugin,
+            msg_count=2,
+        )
