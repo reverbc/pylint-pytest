@@ -33,7 +33,8 @@ def _is_pytest_fixture(decorator):
             # expecting @pytest.fixture(scope=...)
             attr = decorator.func
 
-        if attr and attr.attrname == 'fixture' and attr.expr.name == 'pytest':
+        if attr and attr.attrname in ('fixture', 'yield_fixture') \
+                and attr.expr.name == 'pytest':
             return True
     except AttributeError:
         pass
