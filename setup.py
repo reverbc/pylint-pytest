@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name='pylint-pytest',
-    version='0.1',
+    version='0.1.1',
     author='Reverb Chu',
     author_email='pylint-pytest@reverbc.tw',
     maintainer='Reverb Chu',
