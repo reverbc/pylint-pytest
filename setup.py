@@ -20,7 +20,7 @@ setup(
         'pytest>=4.6',
     ],
     classifiers=[
-        'Development Status :: 1 - Planning',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Testing',
         'Topic :: Software Development :: Quality Assurance',
