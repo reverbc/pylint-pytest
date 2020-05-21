@@ -7,28 +7,20 @@ class TestRedefinedOuterName(BasePytestFixtureChecker):
 
     @pytest.mark.parametrize('enable_plugin', [True, False])
     def test_smoke(self, enable_plugin):
-        self.run_test(
-            enable_plugin=enable_plugin,
-            msg_count=0 if enable_plugin else 1,
-        )
+        self.run_linter(enable_plugin)
+        self.verify_messages(0 if enable_plugin else 1)
 
     @pytest.mark.parametrize('enable_plugin', [True, False])
     def test_caller_yield_fixture(self, enable_plugin):
-        self.run_test(
-            enable_plugin=enable_plugin,
-            msg_count=0 if enable_plugin else 1,
-        )
+        self.run_linter(enable_plugin)
+        self.verify_messages(0 if enable_plugin else 1)
 
     @pytest.mark.parametrize('enable_plugin', [True, False])
     def test_caller_not_a_test_func(self, enable_plugin):
-        self.run_test(
-            enable_plugin=enable_plugin,
-            msg_count=1,
-        )
+        self.run_linter(enable_plugin)
+        self.verify_messages(1)
 
     @pytest.mark.parametrize('enable_plugin', [True, False])
     def test_args_and_kwargs(self, enable_plugin):
-        self.run_test(
-            enable_plugin=enable_plugin,
-            msg_count=2,
-        )
+        self.run_linter(enable_plugin)
+        self.verify_messages(2)

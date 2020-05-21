@@ -9,14 +9,6 @@ class TestRegression(BasePytestFixtureChecker):
     @pytest.mark.parametrize('enable_plugin', [True, False])
     def test_import_twice(self, enable_plugin):
         '''catch a coding error when using fixture + if + inline import'''
-        self.run_test(
-            enable_plugin=enable_plugin,
-            msg_count=2,
-            msg_id='unused-import'
-        )
-
-        self.run_test(
-            enable_plugin=enable_plugin,
-            msg_count=1,
-            msg_id='redefined-outer-name'
-        )
+        self.run_linter(enable_plugin)
+        self.verify_messages(2, msg_id='unused-import')
+        self.verify_messages(1, msg_id='redefined-outer-name')
