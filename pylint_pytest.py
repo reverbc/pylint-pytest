@@ -193,12 +193,14 @@ def register(_):
         # check W0613 unused-argument
         if msgid == 'unused-argument' and \
                 _can_use_fixture(node.parent.parent) and \
+                isinstance(node.parent, astroid.Arguments) and \
                 node.name in self._pytest_fixtures:
             return
 
         # check W0621 redefined-outer-name
         if msgid == 'redefined-outer-name' and \
                 _can_use_fixture(node.parent.parent) and \
+                isinstance(node.parent, astroid.Arguments) and \
                 node.name in self._pytest_fixtures:
             return
 

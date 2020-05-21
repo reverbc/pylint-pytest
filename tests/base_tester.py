@@ -24,7 +24,7 @@ class BasePytestFixtureChecker(CheckerTestCase):
 
         assert matched_count == msg_count
 
-    def run_test(self, msg_count, enable_plugin):
+    def run_test(self, msg_count, enable_plugin, msg_id=None):
         # pylint: disable=protected-access
         file = sys._getframe(1).f_code.co_name.replace('test_', '', 1) + '.py'
         full_file_path = os.path.join(
@@ -41,6 +41,7 @@ class BasePytestFixtureChecker(CheckerTestCase):
                 self._verify(
                     module=module,
                     msg_count=msg_count,
+                    msg_id=msg_id,
                 )
             finally:
                 if enable_plugin:
