@@ -4,6 +4,7 @@
 ### Fixed
 - Fix fixtures defined with `@pytest.yield_fixture` decorator still showing FP
 - Fix crashes when using fixture + if + inline import
+- Fix crashes when relatively importing fixtures (`from ..conftest import fixture`)
 
 ## [0.1.1] - 2020-05-19
 ### Fixed

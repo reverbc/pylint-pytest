@@ -64,12 +64,16 @@ def _can_use_fixture(function):
 
 def _is_same_module(fixtures, import_node, fixture_name):
     '''Comparing pytest fixture node with astroid.ImportFrom'''
-    for fixture in fixtures[fixture_name]:
-        for import_from in import_node.root().globals[fixture_name]:
-            if inspect.getmodule(fixture.func).__file__ == \
-                    import_from.parent.import_module(import_from.modname).file:
-                return True
-
+    try:
+        for fixture in fixtures[fixture_name]:
+            for import_from in import_node.root().globals[fixture_name]:
+                if inspect.getmodule(fixture.func).__file__ == \
+                        import_from.parent.import_module(import_from.modname,
+                                                         False,
+                                                         import_from.level).file:
+                    return True
+    except:  # pylint: disable=bare-except
+        pass
     return False
 
 
