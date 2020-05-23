@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.1.2] - 2020-05-22
 ### Fixed
 - Fix fixtures defined with `@pytest.yield_fixture` decorator still showing FP
 - Fix crashes when using fixture + if + inline import
