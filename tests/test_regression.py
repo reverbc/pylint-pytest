@@ -1,3 +1,4 @@
+import pylint
 import pytest
 from base_tester import BasePytestFixtureChecker
 
@@ -10,5 +11,10 @@ class TestRegression(BasePytestFixtureChecker):
     def test_import_twice(self, enable_plugin):
         '''catch a coding error when using fixture + if + inline import'''
         self.run_linter(enable_plugin)
-        self.verify_messages(2, msg_id='unused-import')
+
+        if int(pylint.__version__.split('.')[0]) < 2:
+            # for some reason pylint 1.9.5 does not raise unused-import for inline import
+            self.verify_messages(1, msg_id='unused-import')
+        else:
+            self.verify_messages(2, msg_id='unused-import')
         self.verify_messages(1, msg_id='redefined-outer-name')
