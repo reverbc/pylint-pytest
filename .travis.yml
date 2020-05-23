@@ -28,7 +28,7 @@ cache:
 
 deploy:
   provider: pypi
-  user: reverb
+  user: __token__
   on:
     tags: true
     condition: "$TOX_ENV = py38"
