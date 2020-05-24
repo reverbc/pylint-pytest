@@ -1,8 +1,10 @@
 import pytest
-from base_tester import BasePytestFixtureChecker
+from pylint.checkers.variables import VariablesChecker
+from base_tester import BasePytestChecker
 
 
-class TestUnusedImport(BasePytestFixtureChecker):
+class TestUnusedImport(BasePytestChecker):
+    CHECKER_CLASS = VariablesChecker
     MSG_ID = 'unused-import'
 
     @pytest.mark.parametrize('enable_plugin', [True, False])

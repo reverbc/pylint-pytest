@@ -1,8 +1,10 @@
 import pytest
-from base_tester import BasePytestFixtureChecker
+from pylint.checkers.variables import VariablesChecker
+from base_tester import BasePytestChecker
 
 
-class TestRedefinedOuterName(BasePytestFixtureChecker):
+class TestRedefinedOuterName(BasePytestChecker):
+    CHECKER_CLASS = VariablesChecker
     MSG_ID = 'redefined-outer-name'
 
     @pytest.mark.parametrize('enable_plugin', [True, False])

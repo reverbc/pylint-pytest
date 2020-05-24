@@ -1,13 +1,12 @@
 import sys
 import os
 from pylint.testutils import CheckerTestCase
-from pylint.checkers.variables import VariablesChecker
 import astroid
 from pylint_pytest import register, unregister
 
 
-class BasePytestFixtureChecker(CheckerTestCase):
-    CHECKER_CLASS = VariablesChecker
+class BasePytestChecker(CheckerTestCase):
+    CHECKER_CLASS = None
     MSG_ID = None
     MESSAGES = None
 
@@ -28,7 +27,7 @@ class BasePytestFixtureChecker(CheckerTestCase):
 
             try:
                 self.walk(module)  # run all checkers
-                self.MESSAGES = self.linter.release_messages()
+                BasePytestChecker.MESSAGES = self.linter.release_messages()
             finally:
                 if enable_plugin:
                     unregister()
