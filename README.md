@@ -66,6 +66,24 @@ def test_something(imported_fixture):  # <- Redefining name 'imported_fixture' f
     ...
 ```
 
+### `no-member`
+
+FP when class attributes are defined in setup fixtures
+
+```python
+import pytest
+
+class TestClass(object):
+    @staticmethod
+    @pytest.fixture(scope='class', autouse=True)
+    def setup_class(request):
+        cls = request.cls
+        cls.defined_in_setup_class = True
+
+    def test_foo(self):
+        assert self.defined_in_setup_class  # <- Instance of 'TestClass' has no 'defined_in_setup_class' member
+```
+
 ## Changelog
 
 See [CHANGELOG](CHANGELOG.md).

@@ -1,9 +1,11 @@
 import os
 import sys
 import inspect
+from collections import defaultdict
 
 import astroid
 from pylint.checkers.variables import VariablesChecker
+from pylint.checkers.typecheck import TypeChecker
 import pylint
 import pytest
 
@@ -11,11 +13,11 @@ import pytest
 def _is_pytest_mark_usefixtures(decorator):
     # expecting @pytest.mark.usefixture(...)
     try:
-        if isinstance(decorator, astroid.Call):
-            if decorator.func.attrname == 'usefixtures' and \
-                    decorator.func.expr.attrname == 'mark' and \
-                    decorator.func.expr.expr.name == 'pytest':
-                return True
+        if isinstance(decorator, astroid.Call) and \
+                decorator.func.attrname == 'usefixtures' and \
+                decorator.func.expr.attrname == 'mark' and \
+                decorator.func.expr.expr.name == 'pytest':
+            return True
     except AttributeError:
         pass
     return False
@@ -36,6 +38,31 @@ def _is_pytest_fixture(decorator):
         if attr and attr.attrname in ('fixture', 'yield_fixture') \
                 and attr.expr.name == 'pytest':
             return True
+    except AttributeError:
+        pass
+
+    return False
+
+
+def _is_class_autouse_fixture(function):
+    try:
+        for decorator in function.decorators.nodes:
+            if isinstance(decorator, astroid.Call):
+                func = decorator.func
+
+                if func and func.attrname in ('fixture', 'yield_fixture') \
+                        and func.expr.name == 'pytest':
+
+                    is_class = is_autouse = False
+
+                    for kwarg in decorator.keywords or []:
+                        if kwarg.arg == 'scope' and kwarg.value.value == 'class':
+                            is_class = True
+                        if kwarg.arg == 'autouse' and kwarg.value.value is True:
+                            is_autouse = True
+
+                    if is_class and is_autouse:
+                        return True
     except AttributeError:
         pass
 
@@ -85,21 +112,26 @@ class FixtureCollector:
         self.fixtures = session._fixturemanager._arg2fixturedefs
 
 
-ORIGINAL = {}
+ORIGINAL = defaultdict(dict)
 
 
 def unregister():
-    VariablesChecker.add_message = ORIGINAL['add_message']
-    del ORIGINAL['add_message']
-    VariablesChecker.visit_functiondef = ORIGINAL['visit_functiondef']
-    del ORIGINAL['visit_functiondef']
-    VariablesChecker.visit_module = ORIGINAL['visit_module']
-    del ORIGINAL['visit_module']
+    VariablesChecker.add_message = ORIGINAL['VariablesChecker']['add_message']
+    VariablesChecker.visit_functiondef = ORIGINAL['VariablesChecker']['visit_functiondef']
+    VariablesChecker.visit_module = ORIGINAL['VariablesChecker']['visit_module']
+    del ORIGINAL['VariablesChecker']
+    TypeChecker.in_setup = False
+    TypeChecker.request_cls = set()
+    TypeChecker.class_node = None
+    TypeChecker.visit_assignattr = ORIGINAL['TypeChecker']['visit_assignattr']
+    TypeChecker.visit_assign = ORIGINAL['TypeChecker']['visit_assign']
+    TypeChecker.visit_functiondef = ORIGINAL['TypeChecker']['visit_functiondef']
+    del ORIGINAL['TypeChecker']
 
 
 # pylint: disable=protected-access
 def register(_):
-    '''Patch VariablesChecker to add additional checks for pytest fixtures
+    '''Patch Pylint Checker classes to add additional checks for pytest
     '''
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     def patched_visit_module(self, node):
@@ -134,8 +166,8 @@ def register(_):
             # restore output devices
             sys.stdout, sys.stderr = stdout, stderr
 
-        ORIGINAL['visit_module'](self, node)
-    ORIGINAL['visit_module'] = VariablesChecker.visit_module
+        ORIGINAL['VariablesChecker']['visit_module'](self, node)
+    ORIGINAL['VariablesChecker']['visit_module'] = VariablesChecker.visit_module
     VariablesChecker.visit_module = patched_visit_module
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -156,8 +188,8 @@ def register(_):
             for arg in node.args.args:
                 self._invoked_with_func_args.add(arg.name)
 
-        ORIGINAL['visit_functiondef'](self, node)
-    ORIGINAL['visit_functiondef'] = VariablesChecker.visit_functiondef
+        ORIGINAL['VariablesChecker']['visit_functiondef'](self, node)
+    ORIGINAL['VariablesChecker']['visit_functiondef'] = VariablesChecker.visit_functiondef
     VariablesChecker.visit_functiondef = patched_visit_functiondef
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -209,12 +241,65 @@ def register(_):
             return
 
         if int(pylint.__version__.split('.')[0]) >= 2:
-            ORIGINAL['add_message'](
+            ORIGINAL['VariablesChecker']['add_message'](
                 self, msgid, line, node, args, confidence, col_offset)
         else:
             # python2 + pylint1.9 backward compatibility
-            ORIGINAL['add_message'](
+            ORIGINAL['VariablesChecker']['add_message'](
                 self, msgid, line, node, args, confidence)
-    ORIGINAL['add_message'] = VariablesChecker.add_message
+    ORIGINAL['VariablesChecker']['add_message'] = VariablesChecker.add_message
     VariablesChecker.add_message = patched_add_message
+    # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    # remembering current state across visit_* methods
+    TypeChecker.in_setup = False
+    TypeChecker.request_cls = set()
+    TypeChecker.class_node = None
+
+    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    def visit_assignattr(self, node):
+        if TypeChecker.in_setup and isinstance(node.expr, astroid.Name) and \
+                node.expr.name in TypeChecker.request_cls and \
+                node.attrname not in TypeChecker.class_node.locals:
+            try:
+                # find Assign node which contains the source "value"
+                assign_node = node
+                while not isinstance(assign_node, astroid.Assign):
+                    assign_node = assign_node.parent
+
+                # hack class locals
+                TypeChecker.class_node.locals[node.attrname] = [assign_node.value]
+            except:  # pylint: disable=bare-except
+                # cannot find valid assign expr, skipping the entire attribute
+                pass
+        ORIGINAL['TypeChecker']['visit_assignattr'](self, node)
+    ORIGINAL['TypeChecker']['visit_assignattr'] = TypeChecker.visit_assignattr
+    TypeChecker.visit_assignattr = visit_assignattr
+    # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    def visit_assign(self, node):
+        '''hijack visit_assign to store the aliases for `cls`'''
+        if TypeChecker.in_setup and isinstance(node.value, astroid.Attribute) and \
+                node.value.attrname == 'cls' and node.value.expr.name == 'request':
+            # storing the aliases for cls from request.cls
+            TypeChecker.request_cls = set(map(lambda t: t.name, node.targets))
+        ORIGINAL['TypeChecker']['visit_assign'](self, node)
+    ORIGINAL['TypeChecker']['visit_assign'] = TypeChecker.visit_assign
+    TypeChecker.visit_assign = visit_assign
+    # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    def visit_functiondef(self, node):
+        '''determine if a method is class setup method'''
+        TypeChecker.in_setup = False
+        TypeChecker.request_cls = set()
+        TypeChecker.class_node = None
+
+        if _can_use_fixture(node) and _is_class_autouse_fixture(node):
+            TypeChecker.in_setup = True
+            TypeChecker.class_node = node.parent
+        ORIGINAL['TypeChecker']['visit_functiondef'](self, node)
+    ORIGINAL['TypeChecker']['visit_functiondef'] = TypeChecker.visit_functiondef
+    TypeChecker.visit_functiondef = visit_functiondef
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
