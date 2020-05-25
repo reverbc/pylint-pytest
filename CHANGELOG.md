@@ -4,6 +4,9 @@
 ### Added
 - Suppressing FP `no-member` from [using workaround of accessing cls in setup fixture](https://github.com/pytest-dev/pytest/issues/3778#issuecomment-411899446)
 
+### Changed
+- Refactor plugin to group patches and augmentations
+
 ## [0.1.2] - 2020-05-22
 ### Fixed
 - Fix fixtures defined with `@pytest.yield_fixture` decorator still showing FP

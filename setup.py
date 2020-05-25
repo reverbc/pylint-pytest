@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from os import path
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 here = path.abspath(path.dirname(__file__))
@@ -22,7 +22,7 @@ setup(
     description='A Pylint plugin to suppress pytest-related false positives.',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    py_modules=['pylint_pytest'],
+    packages=find_packages(exclude=['tests', 'sandbox']),
     install_requires=[
         'pylint',
         'pytest>=4.6',

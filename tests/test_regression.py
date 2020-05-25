@@ -1,12 +1,14 @@
 import pylint
 import pytest
 from pylint.checkers.variables import VariablesChecker
-from base_tester import BasePytestChecker
+from base_tester import BasePytestTester
+from pylint_pytest.checkers.fixture_loader import FixtureLoader
 
 
-class TestRegression(BasePytestChecker):
+class TestRegression(BasePytestTester):
     '''Covering some behaviors that shouldn't get impacted by the plugin'''
-    CHECKER_CLASS = VariablesChecker
+    CHECKER_CLASS = FixtureLoader
+    IMPACTED_CHECKER_CLASSES = [VariablesChecker]
     MSG_ID = 'regression'
 
     @pytest.mark.parametrize('enable_plugin', [True, False])

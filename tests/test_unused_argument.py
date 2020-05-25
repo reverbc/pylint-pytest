@@ -1,10 +1,12 @@
 import pytest
 from pylint.checkers.variables import VariablesChecker
-from base_tester import BasePytestChecker
+from base_tester import BasePytestTester
+from pylint_pytest.checkers.fixture_loader import FixtureLoader
 
 
-class TestUnusedArgument(BasePytestChecker):
-    CHECKER_CLASS = VariablesChecker
+class TestUnusedArgument(BasePytestTester):
+    CHECKER_CLASS = FixtureLoader
+    IMPACTED_CHECKER_CLASSES = [VariablesChecker]
     MSG_ID = 'unused-argument'
 
     @pytest.mark.parametrize('enable_plugin', [True, False])

@@ -1,10 +1,12 @@
 import pytest
 from pylint.checkers.typecheck import TypeChecker
-from base_tester import BasePytestChecker
+from pylint_pytest.checkers.class_attr_loader import ClassAttrLoader
+from base_tester import BasePytestTester
 
 
-class TestNoMember(BasePytestChecker):
-    CHECKER_CLASS = TypeChecker
+class TestNoMember(BasePytestTester):
+    CHECKER_CLASS = ClassAttrLoader
+    IMPACTED_CHECKER_CLASSES = [TypeChecker]
     MSG_ID = 'no-member'
 
     @pytest.mark.parametrize('enable_plugin', [True, False])

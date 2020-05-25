@@ -1,16 +1,27 @@
 import sys
 import os
-from pylint.testutils import CheckerTestCase
 import astroid
-from pylint_pytest import register, unregister
+from pylint.testutils import UnittestLinter
+try:
+    from pylint.utils import ASTWalker
+except ImportError:
+    # for pylint 1.9
+    from pylint.utils import PyLintASTWalker as ASTWalker
+from pylint.checkers import BaseChecker
 
 
-class BasePytestChecker(CheckerTestCase):
-    CHECKER_CLASS = None
+class BasePytestTester(object):
+    CHECKER_CLASS = BaseChecker
+    IMPACTED_CHECKER_CLASSES = []
     MSG_ID = None
     MESSAGES = None
+    CONFIG = {}
+
+    enable_plugin = True
 
     def run_linter(self, enable_plugin, file_path=None):
+        self.enable_plugin = enable_plugin
+
         # pylint: disable=protected-access
         if file_path is None:
             module = sys._getframe(1).f_code.co_name.replace('test_', '', 1)
@@ -22,15 +33,8 @@ class BasePytestChecker(CheckerTestCase):
             module = astroid.parse(content)
             module.file = fin.name
 
-            if enable_plugin:
-                register(None)
-
-            try:
-                self.walk(module)  # run all checkers
-                BasePytestChecker.MESSAGES = self.linter.release_messages()
-            finally:
-                if enable_plugin:
-                    unregister()
+        self.walk(module)  # run all checkers
+        BasePytestTester.MESSAGES = self.linter.release_messages()
 
     def verify_messages(self, msg_count, msg_id=None):
         msg_id = msg_id or self.MSG_ID
@@ -43,3 +47,33 @@ class BasePytestChecker(CheckerTestCase):
                 matched_count += 1
 
         assert matched_count == msg_count
+
+    def setup_method(self):
+        self.linter = UnittestLinter()
+        self.checker = self.CHECKER_CLASS(self.linter)
+        self.impacted_checkers = []
+
+        for key, value in self.CONFIG.items():
+            setattr(self.checker.config, key, value)
+        self.checker.open()
+
+        for checker_class in self.IMPACTED_CHECKER_CLASSES:
+            checker = checker_class(self.linter)
+            for key, value in self.CONFIG.items():
+                setattr(checker.config, key, value)
+            checker.open()
+            self.impacted_checkers.append(checker)
+
+    def teardown_method(self):
+        self.checker.close()
+        for checker in self.impacted_checkers:
+            checker.close()
+
+    def walk(self, node):
+        """recursive walk on the given node"""
+        walker = ASTWalker(self.linter)
+        if self.enable_plugin:
+            walker.add_checker(self.checker)
+        for checker in self.impacted_checkers:
+            walker.add_checker(checker)
+        walker.walk(node)
