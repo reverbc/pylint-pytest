@@ -15,8 +15,15 @@ def _is_pytest_mark_usefixtures(decorator):
     return False
 
 
-def _is_pytest_fixture(decorator):
+def _is_pytest_fixture(decorator, fixture=True, yield_fixture=True):
     attr = None
+    to_check = set()
+
+    if fixture:
+        to_check.add('fixture')
+
+    if yield_fixture:
+        to_check.add('yield_fixture')
 
     try:
         if isinstance(decorator, astroid.Attribute):
@@ -27,7 +34,7 @@ def _is_pytest_fixture(decorator):
             # expecting @pytest.fixture(scope=...)
             attr = decorator.func
 
-        if attr and attr.attrname in ('fixture', 'yield_fixture') \
+        if attr and attr.attrname in to_check \
                 and attr.expr.name == 'pytest':
             return True
     except AttributeError:

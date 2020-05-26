@@ -84,6 +84,20 @@ class TestClass(object):
         assert self.defined_in_setup_class  # <- Instance of 'TestClass' has no 'defined_in_setup_class' member
 ```
 
+## Raise new warning(s)
+
+### W6401 `deprecated-pytest-yield-fixture`
+
+Raise when using deprecated `@pytest.yield_fixture` decorator ([ref](https://docs.pytest.org/en/latest/yieldfixture.html))
+
+```python
+import pytest
+
+@pytest.yield_fixture  # <- Using a deprecated @pytest.yield_fixture decorator
+def yield_fixture():
+    yield
+```
+
 ## Changelog
 
 See [CHANGELOG](CHANGELOG.md).

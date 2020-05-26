@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- W6401 `deprecated-pytest-yield-fixture`: add warning for [yield_fixture functions](https://docs.pytest.org/en/latest/yieldfixture.html)
 
 ## [0.2.0] - 2020-05-25
 ### Added

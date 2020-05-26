@@ -1,11 +1,11 @@
 import pytest
 from pylint.checkers.variables import VariablesChecker
 from base_tester import BasePytestTester
-from pylint_pytest.checkers.fixture_loader import FixtureLoader
+from pylint_pytest.checkers.fixture import FixtureChecker
 
 
 class TestUnusedArgument(BasePytestTester):
-    CHECKER_CLASS = FixtureLoader
+    CHECKER_CLASS = FixtureChecker
     IMPACTED_CHECKER_CLASSES = [VariablesChecker]
     MSG_ID = 'unused-argument'
 
