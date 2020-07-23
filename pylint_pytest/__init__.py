@@ -1,5 +1,4 @@
 import os
-import sys
 import inspect
 import importlib
 import glob
@@ -19,7 +18,7 @@ def register(linter):
         module = module.replace(dirname, '', 1)
 
         # translate file path into module import path
-        module = module.replace('/', '.')
+        module = module.replace(os.sep, '.')
 
         checker = importlib.import_module(module, package=os.path.basename(dirname))
         for attr_name in dir(checker):
