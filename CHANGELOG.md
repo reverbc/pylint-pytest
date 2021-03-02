@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Python 3.9 support
 
 ### Removed
 - Python 2.7 & 3.5 support
