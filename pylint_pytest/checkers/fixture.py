@@ -72,7 +72,7 @@ class FixtureChecker(BasePytestChecker):
                 # run pytest session with customized plugin to collect fixtures
                 fixture_collector = FixtureCollector()
                 pytest.main(
-                    [node.file, '--fixtures'],
+                    [node.file, '--fixtures', '--collect-only'],
                     plugins=[fixture_collector],
                 )
                 FixtureChecker._pytest_fixtures = fixture_collector.fixtures

@@ -1,6 +1,14 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Python 3.9 support
+
+### Removed
+- Python 2.7 & 3.5 support
+
+### Fixed
+- Fix not able to work with `pytest-xdist` plugin when `--dist loadfile` is set in configuration file (#5)
 
 ## [0.3.0] - 2020-08-10
 ### Added
