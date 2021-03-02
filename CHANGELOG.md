@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- Fix not able to work with `pytest-xdist` plugin when `--dist loadfile` is set in configuration file (#5)
+
 ## [0.3.0] - 2020-08-10
 ### Added
 - W6401 `deprecated-pytest-yield-fixture`: add warning for [yield_fixture functions](https://docs.pytest.org/en/latest/yieldfixture.html)
