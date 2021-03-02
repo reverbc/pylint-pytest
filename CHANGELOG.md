@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Removed
+- Python 2.7 & 3.5 support
+
 ### Fixed
 - Fix not able to work with `pytest-xdist` plugin when `--dist loadfile` is set in configuration file (#5)
 
