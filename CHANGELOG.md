@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [1.0.0] - 2021-03-02
 ### Added
 - Python 3.9 support
 

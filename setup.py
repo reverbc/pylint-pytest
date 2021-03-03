@@ -12,7 +12,7 @@ with open(path.join(here, 'README.md')) as fin:
 
 setup(
     name='pylint-pytest',
-    version='0.3.0',
+    version='1.0.0',
     author='Reverb Chu',
     author_email='pylint-pytest@reverbc.tw',
     maintainer='Reverb Chu',
@@ -28,7 +28,7 @@ setup(
         'pytest>=4.6',
     ],
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Testing',
         'Topic :: Software Development :: Quality Assurance',
