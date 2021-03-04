@@ -12,7 +12,7 @@ with open(path.join(here, 'README.md')) as fin:
 
 setup(
     name='pylint-pytest',
-    version='1.0.0',
+    version='1.0.1',
     author='Reverb Chu',
     author_email='pylint-pytest@reverbc.tw',
     maintainer='Reverb Chu',
