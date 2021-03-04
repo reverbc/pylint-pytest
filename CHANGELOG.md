@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+- Suppressing FP `unused-import` when fixtures defined elsewhere are imported into `conftest.py` but not directly used (#2)
+
 ## [1.0.0] - 2021-03-02
 ### Added
 - Python 3.9 support

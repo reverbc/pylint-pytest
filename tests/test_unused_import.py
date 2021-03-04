@@ -32,3 +32,10 @@ class TestUnusedImport(BasePytestTester):
         name as fixture - should still raise unused-import warning'''
         self.run_linter(enable_plugin)
         self.verify_messages(1)
+
+    @pytest.mark.parametrize('enable_plugin', [True, False])
+    def test_conftest(self, enable_plugin):
+        '''fixtures are defined in different modules and imported to conftest
+        for pytest to do its magic'''
+        self.run_linter(enable_plugin)
+        self.verify_messages(0 if enable_plugin else 1)

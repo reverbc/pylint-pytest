@@ -30,23 +30,22 @@ class BasePytestTester(object):
 
         with open(file_path) as fin:
             content = fin.read()
-            module = astroid.parse(content)
+            module = astroid.parse(content, module_name=module)
             module.file = fin.name
 
         self.walk(module)  # run all checkers
-        BasePytestTester.MESSAGES = self.linter.release_messages()
+        self.MESSAGES = self.linter.release_messages()
 
     def verify_messages(self, msg_count, msg_id=None):
         msg_id = msg_id or self.MSG_ID
 
         matched_count = 0
         for message in self.MESSAGES:
-            print(message)
             # only care about ID and count, not the content
             if message.msg_id == msg_id:
                 matched_count += 1
 
-        assert matched_count == msg_count
+        assert matched_count == msg_count, f'expecting {msg_count}, actual {matched_count}'
 
     def setup_method(self):
         self.linter = UnittestLinter()

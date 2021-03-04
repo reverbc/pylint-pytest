@@ -71,10 +71,14 @@ class FixtureChecker(BasePytestChecker):
 
                 # run pytest session with customized plugin to collect fixtures
                 fixture_collector = FixtureCollector()
+
+                # save and restore sys.path to prevent pytest.main from altering it
+                sys_path = sys.path.copy()
                 pytest.main(
                     [node.file, '--fixtures', '--collect-only'],
                     plugins=[fixture_collector],
                 )
+                sys.path = sys_path
                 FixtureChecker._pytest_fixtures = fixture_collector.fixtures
         finally:
             # restore output devices
@@ -117,6 +121,13 @@ class FixtureChecker(BasePytestChecker):
             # ignoring 'import %s' message
             if message_tokens[0] == 'import' and len(message_tokens) == 2:
                 pass
+
+            # fixture is defined in other modules and being imported to
+            # conftest for pytest magic
+            elif isinstance(node.parent, astroid.Module) \
+                    and node.parent.name.split('.')[-1] == 'conftest' \
+                    and fixture_name in FixtureChecker._pytest_fixtures:
+                return
 
             # imported fixture is referenced in test/fixture func
             elif fixture_name in FixtureChecker._invoked_with_func_args \
