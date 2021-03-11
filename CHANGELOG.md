@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Fixed
 - Fix pytest **Module already imported so cannot be rewritten** warning when the package being linted was used by pytest/conftest already (#10)
+- Fix missing Python version constraint (#11)
 
 ## [1.0.1] - 2021-03-03
 ### Added
