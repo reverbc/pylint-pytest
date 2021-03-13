@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+## Fixed
+- Fix #13 regression caused by mangling `sys.modules`
 
 ## [1.0.2] - 2021-03-10
 ### Fixed

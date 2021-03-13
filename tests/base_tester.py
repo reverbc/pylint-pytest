@@ -1,5 +1,7 @@
 import sys
 import os
+from pprint import pprint
+
 import astroid
 from pylint.testutils import UnittestLinter
 try:
@@ -45,6 +47,7 @@ class BasePytestTester(object):
             if message.msg_id == msg_id:
                 matched_count += 1
 
+        pprint(self.MESSAGES)
         assert matched_count == msg_count, f'expecting {msg_count}, actual {matched_count}'
 
     def setup_method(self):
