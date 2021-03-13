@@ -72,24 +72,19 @@ class FixtureChecker(BasePytestChecker):
                 # run pytest session with customized plugin to collect fixtures
                 fixture_collector = FixtureCollector()
 
-                # save and remove modules imported by pytest to prevent pytest warning during fixture collection:
-                # <PytestAssertRewriteWarning: Module already imported so cannot be rewritten>
-                sys_mods = set(sys.modules.keys())
-
                 # save and restore sys.path to prevent pytest.main from altering it
                 sys_path = sys.path.copy()
 
                 pytest.main(
-                    [node.file, '--fixtures', '--collect-only'],
+                    [
+                        node.file, '--fixtures', '--collect-only',
+                        '--pythonwarnings=ignore:Module already imported:pytest.PytestWarning',
+                    ],
                     plugins=[fixture_collector],
                 )
 
                 # restore sys.path
                 sys.path = sys_path
-
-                # unload modules imported by pytest.main
-                for module in set(sys.modules.keys()) - sys_mods:
-                    del sys.modules[module]
 
                 FixtureChecker._pytest_fixtures = fixture_collector.fixtures
         finally:
