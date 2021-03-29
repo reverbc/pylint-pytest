@@ -5,7 +5,13 @@ import pylint
 from pylint.checkers.variables import VariablesChecker
 from pylint.interfaces import IAstroidChecker
 import pytest
-from ..utils import _can_use_fixture, _is_same_module, _is_pytest_mark_usefixtures, _is_pytest_fixture
+from ..utils import (
+    _can_use_fixture,
+    _is_pytest_mark,
+    _is_pytest_mark_usefixtures,
+    _is_pytest_fixture,
+    _is_same_module,
+)
 from . import BasePytestChecker
 
 
@@ -26,17 +32,18 @@ class FixtureChecker(BasePytestChecker):
             'Used when using a deprecated pytest decorator that has been deprecated in pytest-3.0'
         ),
         'W6402': (
-            'Using useless `@pytest.mark.usefixtures` decorator for fixtures',
-            'useless-pytest-usefixtures-decorator',
+            'Using useless `@pytest.mark.*` decorator for fixtures',
+            'useless-pytest-mark-decorator',
             (
-                '@pytest.mark.usefixtures decorator doesn\'t work as expected for fixtures. '
-                'Take a look at: https://docs.pytest.org/en/stable/fixture.html#usefixtures'
+                '@pytest.mark.* decorators can\'t by applied to fixtures. '
+                'Take a look at: https://docs.pytest.org/en/stable/reference.html#marks'
             ),
         ),
         'W6403': (
-            'Using a deprecated scope of fixture as positional argument',
-            'deprecated-pytest-fixture-scope-as-positional-argument',
-            'Pass scope as a kwarg, not positional arg, which is deprecated in future pytest.',
+            'Using a deprecated positional arguments for fixture',
+            'deprecated-positional-argument-for-pytest-fixture',
+            'Pass scope as a kwarg, not positional arg, which is deprecated in future pytest.'
+            'Take a look at: https://docs.pytest.org/en/stable/deprecations.html#pytest-fixture-arguments-are-keyword-only',
         ),
     }
 
@@ -109,14 +116,14 @@ class FixtureChecker(BasePytestChecker):
         Walk through all decorators on functions.
         Tries to find cases:
             When uses `@pytest.fixture` with `scope` as positional argument (deprecated)
-            https://docs.pytest.org/en/stable/reference.html#pytest-fixture
+            https://docs.pytest.org/en/stable/deprecations.html#pytest-fixture-arguments-are-keyword-only
                 >>> @pytest.fixture("module")
                 >>> def awesome_fixture(): ...
                 Instead
                 >>> @pytest.fixture(scope="module")
                 >>> def awesome_fixture(): ...
             When uses `@pytest.mark.usefixtures` for fixture (useless because didn't work)
-            https://docs.pytest.org/en/stable/fixture.html#usefixtures
+            https://docs.pytest.org/en/stable/reference.html#marks
                 >>> @pytest.mark.usefixtures("another_fixture")
                 >>> @pytest.fixture
                 >>> def awesome_fixture(): ...
@@ -124,21 +131,20 @@ class FixtureChecker(BasePytestChecker):
         ----------
         node : astroid.scoped_nodes.Decorators
         """
-        uses_fixture_deco, uses_usefixture_deco = 0, 0
+        uses_fixture_deco, uses_mark_deco = False, False
         for decorator in node.nodes:
             try:
                 if _is_pytest_fixture(decorator) and isinstance(decorator, astroid.Call) and decorator.args:
                     self.add_message(
-                        'deprecated-pytest-fixture-scope-as-positional-argument', node=decorator
+                        'deprecated-positional-argument-for-pytest-fixture', node=decorator
                     )
-                uses_fixture_deco += _is_pytest_fixture(decorator)
-                uses_usefixture_deco += _is_pytest_mark_usefixtures(decorator)
+                uses_fixture_deco |= _is_pytest_fixture(decorator)
+                uses_mark_deco |= _is_pytest_mark(decorator)
             except AttributeError:
                 # ignore any parse exceptions
                 pass
-
-        if uses_usefixture_deco and uses_fixture_deco:
-            self.add_message("useless-pytest-usefixtures-decorator", node=node)
+        if uses_mark_deco and uses_fixture_deco:
+            self.add_message("useless-pytest-mark-decorator", node=node)
 
     def visit_functiondef(self, node):
         '''

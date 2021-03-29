@@ -15,6 +15,17 @@ def _is_pytest_mark_usefixtures(decorator):
     return False
 
 
+def _is_pytest_mark(decorator):
+    try:
+        deco = decorator  # as attribute `@pytest.mark.trylast`
+        if isinstance(decorator, astroid.Call):
+            deco = decorator.func  # as function `@pytest.mark.skipif(...)`
+        if deco.expr.attrname == 'mark' and deco.expr.expr.name == 'pytest':
+            return True
+    except AttributeError:
+        return False
+
+
 def _is_pytest_fixture(decorator, fixture=True, yield_fixture=True):
     attr = None
     to_check = set()
