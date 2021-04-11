@@ -47,8 +47,11 @@ class FixtureChecker(BasePytestChecker):
         'W6403': (
             'Using a deprecated positional arguments for fixture',
             'deprecated-positional-argument-for-pytest-fixture',
-            'Pass scope as a kwarg, not positional arg, which is deprecated in future pytest.'
-            'Take a look at: https://docs.pytest.org/en/stable/deprecations.html#pytest-fixture-arguments-are-keyword-only',
+            (
+                'Pass scope as a kwarg, not positional arg, which is deprecated in future pytest. '
+                'Take a look at: https://docs.pytest.org/en/stable/deprecations.html#pytest-fixture-arguments-are-keyword-only'
+            ),
+        ),
         'F6401': (
             (
                 'pylint-pytest plugin cannot enumerate and collect pytest fixtures. '
