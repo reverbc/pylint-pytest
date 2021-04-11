@@ -99,6 +99,31 @@ def yield_fixture():
     yield
 ```
 
+### W6402 `useless-pytest-mark-decorator`
+Raise when using every `@pytest.mark.*` for the fixture ([ref](https://docs.pytest.org/en/stable/reference.html#marks))
+```python
+import pytest
+
+@pytest.fixture
+def awesome_fixture():
+    ...
+
+@pytest.fixture
+@pytest.mark.usefixtures("awesome_fixture")
+def another_awesome_fixture():
+    ...
+```
+
+### W6403 `deprecated-positional-argument-for-pytest-fixture`
+Raise when using deprecated positional arguments for fixture decorator
+```python
+import pytest
+
+@pytest.fixture("module")
+def awesome_fixture():
+    ...
+```
+
 ## Changelog
 
 See [CHANGELOG](CHANGELOG.md).
