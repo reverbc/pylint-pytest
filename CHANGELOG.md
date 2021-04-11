@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [1.1.0] - 2021-04-11
 ## Added
 - W6402 `useless-pytest-mark-decorator`: add warning for [using pytest.mark on fixtures](https://docs.pytest.org/en/stable/reference.html#marks) (thanks to @DKorytkin)
 - W6403 `deprecated-positional-argument-for-pytest-fixture`: add warning for [positional arguments to pytest.fixture()](https://docs.pytest.org/en/stable/deprecations.html#pytest-fixture-arguments-are-keyword-only) (thanks to @DKorytkin)
