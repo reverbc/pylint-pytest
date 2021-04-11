@@ -128,6 +128,14 @@ def awesome_fixture():
     ...
 ```
 
+### F6401 `cannot-enumerate-pytest-fixtures`
+
+Raise when the plugin cannot enumerate and collect pytest fixtures for analysis
+
+```python
+import no_such_package  # <- pylint-pytest plugin cannot enumerate and collect pytest fixtures
+```
+
 ## Changelog
 
 See [CHANGELOG](CHANGELOG.md).

@@ -17,10 +17,15 @@ from . import BasePytestChecker
 
 class FixtureCollector:
     fixtures = {}
+    errors = set()
 
     def pytest_sessionfinish(self, session):
         # pylint: disable=protected-access
         self.fixtures = session._fixturemanager._arg2fixturedefs
+
+    def pytest_collectreport(self, report):
+        if report.failed:
+            self.errors.add(report)
 
 
 class FixtureChecker(BasePytestChecker):
@@ -44,6 +49,13 @@ class FixtureChecker(BasePytestChecker):
             'deprecated-positional-argument-for-pytest-fixture',
             'Pass scope as a kwarg, not positional arg, which is deprecated in future pytest.'
             'Take a look at: https://docs.pytest.org/en/stable/deprecations.html#pytest-fixture-arguments-are-keyword-only',
+        'F6401': (
+            (
+                'pylint-pytest plugin cannot enumerate and collect pytest fixtures. '
+                'Please run `pytest --fixtures --collect-only` and resolve any potential syntax error or package dependency issues'
+            ),
+            'cannot-enumerate-pytest-fixtures',
+            'Used when pylint-pytest has been unable to enumerate and collect pytest fixtures.',
         ),
     }
 
@@ -95,7 +107,7 @@ class FixtureChecker(BasePytestChecker):
                 # save and restore sys.path to prevent pytest.main from altering it
                 sys_path = sys.path.copy()
 
-                pytest.main(
+                ret = pytest.main(
                     [
                         node.file, '--fixtures', '--collect-only',
                         '--pythonwarnings=ignore:Module already imported:pytest.PytestWarning',
@@ -107,6 +119,9 @@ class FixtureChecker(BasePytestChecker):
                 sys.path = sys_path
 
                 FixtureChecker._pytest_fixtures = fixture_collector.fixtures
+
+                if ret != pytest.ExitCode.OK or fixture_collector.errors:
+                    self.add_message('cannot-enumerate-pytest-fixtures', node=node)
         finally:
             # restore output devices
             sys.stdout, sys.stderr = stdout, stderr

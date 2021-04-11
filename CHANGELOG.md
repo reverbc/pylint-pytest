@@ -4,6 +4,7 @@
 ## Added
 - W6402 `useless-pytest-mark-decorator`: add warning for [using pytest.mark on fixtures](https://docs.pytest.org/en/stable/reference.html#marks) (thanks to @DKorytkin)
 - W6403 `deprecated-positional-argument-for-pytest-fixture`: add warning for [positional arguments to pytest.fixture()](https://docs.pytest.org/en/stable/deprecations.html#pytest-fixture-arguments-are-keyword-only) (thanks to @DKorytkin)
+- F6401 `cannot-enumerate-pytest-fixtures`: add fatal error when the plugin cannot enumerate and collect pytest fixtures for analysis (#27)
 
 ## [1.0.3] - 2021-03-13
 ## Fixed
