@@ -11,6 +11,11 @@ except ImportError:
     from pylint.utils import PyLintASTWalker as ASTWalker
 from pylint.checkers import BaseChecker
 
+import pylint_pytest.checkers.fixture
+
+# XXX: allow all file name
+pylint_pytest.checkers.fixture.FILE_NAME_PATTERNS = ('*', )
+
 
 class BasePytestTester(object):
     CHECKER_CLASS = BaseChecker

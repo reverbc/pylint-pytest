@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+## Fixed
+- Fix pytest fixture collection error on non-test modules
 
 ## [1.1.0] - 2021-04-11
 ## Added

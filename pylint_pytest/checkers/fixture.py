@@ -1,5 +1,8 @@
 import os
 import sys
+from pathlib import Path
+import fnmatch
+
 import astroid
 import pylint
 from pylint.checkers.variables import VariablesChecker
@@ -13,6 +16,9 @@ from ..utils import (
     _is_same_module,
 )
 from . import BasePytestChecker
+
+# TODO: support pytest python_files configuration
+FILE_NAME_PATTERNS = ('test_*.py', '*_test.py')
 
 
 class FixtureCollector:
@@ -55,7 +61,7 @@ class FixtureChecker(BasePytestChecker):
         'F6401': (
             (
                 'pylint-pytest plugin cannot enumerate and collect pytest fixtures. '
-                'Please run `pytest --fixtures --collect-only` and resolve any potential syntax error or package dependency issues'
+                'Please run `pytest --fixtures --collect-only path/to/current/module.py` and resolve any potential syntax error or package dependency issues'
             ),
             'cannot-enumerate-pytest-fixtures',
             'Used when pylint-pytest has been unable to enumerate and collect pytest fixtures.',
@@ -98,6 +104,12 @@ class FixtureChecker(BasePytestChecker):
         # storing all invoked fixtures through @pytest.mark.usefixture(...)
         FixtureChecker._invoked_with_usefixtures = set()  # Set[str]
 
+        is_test_module = False
+        for pattern in FILE_NAME_PATTERNS:
+            if fnmatch.fnmatch(Path(node.file).name, pattern):
+                is_test_module = True
+                break
+
         try:
             with open(os.devnull, 'w') as devnull:
                 # suppress any future output from pytest
@@ -123,7 +135,7 @@ class FixtureChecker(BasePytestChecker):
 
                 FixtureChecker._pytest_fixtures = fixture_collector.fixtures
 
-                if ret != pytest.ExitCode.OK or fixture_collector.errors:
+                if (ret != pytest.ExitCode.OK or fixture_collector.errors) and is_test_module:
                     self.add_message('cannot-enumerate-pytest-fixtures', node=node)
         finally:
             # restore output devices
