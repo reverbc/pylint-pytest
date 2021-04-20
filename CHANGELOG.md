@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.1.2] - 2021-04-19
+### Fixed
+- Fix #18 plugin crash when test case is marked with a non-pytest.mark decorator
+
 ## [1.1.1] - 2021-04-12
 ### Fixed
 - Fix pytest fixture collection error on non-test modules

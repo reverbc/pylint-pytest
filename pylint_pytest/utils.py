@@ -23,7 +23,8 @@ def _is_pytest_mark(decorator):
         if deco.expr.attrname == 'mark' and deco.expr.expr.name == 'pytest':
             return True
     except AttributeError:
-        return False
+        pass
+    return False
 
 
 def _is_pytest_fixture(decorator, fixture=True, yield_fixture=True):

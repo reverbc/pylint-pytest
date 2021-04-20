@@ -25,3 +25,7 @@ class TestPytestMarkUsefixtures(BasePytestTester):
     def test_other_marks_using_for_fixture(self):
         self.run_linter(enable_plugin=True)
         self.verify_messages(4)
+
+    def test_not_pytest_marker(self):
+        self.run_linter(enable_plugin=True)
+        self.verify_messages(0)
