@@ -1,3 +1,4 @@
+import re
 import os
 import sys
 from pathlib import Path
@@ -10,6 +11,7 @@ from pylint.interfaces import IAstroidChecker
 import pytest
 from ..utils import (
     _can_use_fixture,
+    _is_in_describe_section_when_enabled,
     _is_pytest_mark,
     _is_pytest_mark_usefixtures,
     _is_pytest_fixture,
@@ -72,6 +74,7 @@ class FixtureChecker(BasePytestChecker):
     _invoked_with_func_args = set()
     _invoked_with_usefixtures = set()
     _original_add_message = callable
+    enable_plugin = True
 
     def open(self):
         # patch VariablesChecker.add_message
@@ -217,6 +220,11 @@ class FixtureChecker(BasePytestChecker):
         '''
         - intercept and discard unwanted warning messages
         '''
+        if not FixtureChecker.enable_plugin:
+            FixtureChecker._original_add_message(
+                self, msgid, line, node, args, confidence, col_offset
+            )
+            return
         # check W0611 unused-import
         if msgid == 'unused-import':
             # actual attribute name is not passed as arg so...dirty hack
@@ -264,6 +272,12 @@ class FixtureChecker(BasePytestChecker):
                 isinstance(node.parent, astroid.Arguments) and \
                 node.name in FixtureChecker._pytest_fixtures:
             return
+
+        # check W0612 unused-variable
+        if msgid == 'unused-variable' and \
+                _is_in_describe_section_when_enabled(node):
+            return
+
 
         if int(pylint.__version__.split('.')[0]) >= 2:
             FixtureChecker._original_add_message(

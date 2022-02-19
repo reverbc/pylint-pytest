@@ -12,7 +12,7 @@ with open(path.join(here, 'README.md')) as fin:
 
 setup(
     name='pylint-pytest',
-    version='1.1.2',
+    version='1.1.3',
     author='Reverb Chu',
     author_email='pylint-pytest@reverbc.tw',
     maintainer='Reverb Chu',
@@ -27,6 +27,9 @@ setup(
         'pylint',
         'pytest>=4.6',
     ],
+    extras_require={
+        'pytest_describe': ['pytest_describe'],
+    },
     python_requires='>=3.6',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -43,6 +46,6 @@ setup(
         'Operating System :: OS Independent',
         'License :: OSI Approved :: MIT License',
     ],
-    tests_require=['pytest', 'pylint'],
+    tests_require=['pytest', 'pytest_describe', 'pylint'],
     keywords=['pylint', 'pytest', 'plugin'],
 )

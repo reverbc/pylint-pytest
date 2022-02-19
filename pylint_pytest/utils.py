@@ -1,5 +1,49 @@
 import inspect
+import re
 import astroid
+import pytest
+import sys
+
+
+PYTEST_LT_7_0 = getattr(pytest, 'version_tuple', (0, 0)) < (7, 0)
+
+
+try:
+    import pytest_describe
+    PYTEST_DESCRIBE = True
+except ImportError:
+    PYTEST_DESCRIBE = False
+    describe_prefixes_option = ()
+
+
+if PYTEST_DESCRIBE:
+    describe_prefix = "describe"
+    try:
+        import _pytest.config.findpaths
+        config = _pytest.config.findpaths.determine_setup([], sys.argv[1:])
+        if config:
+            if PYTEST_LT_7_0:
+                describe_prefix = config[2].config.sections.get('tool:pytest', {}).get('describe_prefixes', describe_prefix)
+            else:
+                describe_prefix = config[2].get('describe_prefixes', describe_prefix)
+    finally:
+        describe_prefixes_option = tuple(describe_prefix.split(' '))
+
+
+describe_prefix_matcher = re.compile(fr'^{"|".join(describe_prefixes_option)}_.+$')
+
+
+def _is_in_describe_section_when_enabled(node):
+    import _pytest.config.findpaths
+    describe_prefix = "describe"
+    config = _pytest.config.findpaths.determine_setup([], sys.argv[1:])
+    if config:
+        if PYTEST_LT_7_0:
+            describe_prefix = config[2].config.sections.get('tool:pytest', {}).get('describe_prefixes', describe_prefix)
+        else:
+            describe_prefix = config[2].get('describe_prefixes', describe_prefix)
+    return (PYTEST_DESCRIBE and
+        (node.parent is not None and isinstance(node.parent, astroid.FunctionDef) and re.match(describe_prefix_matcher, node.parent.name)))
 
 
 def _is_pytest_mark_usefixtures(decorator):
@@ -84,7 +128,7 @@ def _can_use_fixture(function):
     if isinstance(function, astroid.FunctionDef):
 
         # test_*, *_test
-        if function.name.startswith('test_') or function.name.endswith('_test'):
+        if function.name.startswith('test_') or function.name.endswith('_test') or _is_in_describe_section_when_enabled(function):
             return True
 
         if function.decorators:

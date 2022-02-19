@@ -28,6 +28,7 @@ class BasePytestTester(object):
 
     def run_linter(self, enable_plugin, file_path=None):
         self.enable_plugin = enable_plugin
+        self.CHECKER_CLASS.enable_plugin = enable_plugin
 
         # pylint: disable=protected-access
         if file_path is None:
