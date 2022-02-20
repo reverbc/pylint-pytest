@@ -10,6 +10,7 @@ except ImportError:
     # for pylint 1.9
     from pylint.utils import PyLintASTWalker as ASTWalker
 from pylint.checkers import BaseChecker
+import pytest
 
 import pylint_pytest.checkers.fixture
 
@@ -56,14 +57,24 @@ class BasePytestTester(object):
         pprint(self.MESSAGES)
         assert matched_count == msg_count, f'expecting {msg_count}, actual {matched_count}'
 
-    def setup_method(self):
+    @pytest.fixture(scope="function", autouse=True)
+    def within(self, request, enable_plugin):
+        try:
+            request.instance._setup_method(enable_plugin)
+            yield request.instance
+        finally:
+            request.instance._teardown_method(enable_plugin)
+
+
+    def _setup_method(self, enable_plugin):
         self.linter = UnittestLinter()
-        self.checker = self.CHECKER_CLASS(self.linter)
         self.impacted_checkers = []
 
-        for key, value in self.CONFIG.items():
-            setattr(self.checker.config, key, value)
-        self.checker.open()
+        if enable_plugin:
+            self.checker = self.CHECKER_CLASS(self.linter)
+            for key, value in self.CONFIG.items():
+                setattr(self.checker.config, key, value)
+            self.checker.open()
 
         for checker_class in self.IMPACTED_CHECKER_CLASSES:
             checker = checker_class(self.linter)
@@ -72,8 +83,9 @@ class BasePytestTester(object):
             checker.open()
             self.impacted_checkers.append(checker)
 
-    def teardown_method(self):
-        self.checker.close()
+    def _teardown_method(self, enable_plugin):
+        if enable_plugin:
+            self.checker.close()
         for checker in self.impacted_checkers:
             checker.close()
 

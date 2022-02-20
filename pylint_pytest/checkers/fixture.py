@@ -220,11 +220,6 @@ class FixtureChecker(BasePytestChecker):
         '''
         - intercept and discard unwanted warning messages
         '''
-        if not FixtureChecker.enable_plugin:
-            FixtureChecker._original_add_message(
-                self, msgid, line, node, args, confidence, col_offset
-            )
-            return
         # check W0611 unused-import
         if msgid == 'unused-import':
             # actual attribute name is not passed as arg so...dirty hack
